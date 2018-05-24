@@ -63,7 +63,11 @@ export default class RssReader {
       const description = $(article).find('description').get(0).textContent;
       return $(`
         <li class="list-group-item article">
-          <button data-article-index="${index}" class="btn btn-primary article__button">See details</button>
+          <button data-role="rss-article-details"
+            data-article-index="${index}"
+            class="btn btn-primary article__button">
+                See details
+           </button>
           <p class="article__description d-none">${description}</p>
           <a class="article__link" href="${link}">${title}</a>
         </li>
@@ -116,7 +120,7 @@ export default class RssReader {
   init() {
     this.input.on('input', () => this.inputProcess(this));
     this.form.on('submit', event => this.submitProcess(event));
-    $(document).on('click', '.article__button', (event) => {
+    $(document).on('click', '[data-role="rss-article-details"]', (event) => {
       this.showModal($(event.target).siblings('.article__description').html());
     });
     return this;
