@@ -4,6 +4,22 @@ import $ from 'jquery';
 
 const parser = new DOMParser();
 
+const getArticleTime = article => new Date($(article).find('pubDate').html()).getTime();
+
+const retrieveArticlesFromFeed = (feed) => {
+  const channel = $(parser.parseFromString(feed, 'application/xml')).find('channel');
+  return [...$(channel).find('item')];
+};
+
+const renderArticle = (index, description, link, title) =>
+  `<li class="list-group-item article">
+    <button data-role="rss-article-details"
+      data-article-index="${index}"
+      class="btn btn-primary article__button">See details</button>
+    <p class="article__description d-none">${description}</p>
+    <a class="article__link" href="${link}">${title}</a>
+  </li>`;
+
 export default class RssReader {
   constructor(container) {
     this.state = {
@@ -16,6 +32,7 @@ export default class RssReader {
       },
       rssFeeds: [],
       rssArticles: [],
+      updateProcessIsRunning: false,
     };
     this.serviceUrl = 'https://cors-proxy.htmldriven.com/';
     this.form = $(container).find('[data-role="rss-form"]');
@@ -57,23 +74,14 @@ export default class RssReader {
     return this;
   }
   renderArticles() {
-    this.state.rssArticles.map((article, index) => {
+    const mapArticles = (feed, index) => feed.items.map((article) => {
       const title = $(article).find('title').html();
       const link = $(article).find('link').html();
       const description = $(article).find('description').get(0).textContent;
-      return $(`
-        <li class="list-group-item article">
-          <button data-role="rss-article-details"
-            data-article-index="${index}"
-            class="btn btn-primary article__button">
-                See details
-           </button>
-          <p class="article__description d-none">${description}</p>
-          <a class="article__link" href="${link}">${title}</a>
-        </li>
-        `)
-        .prependTo(this.articlesContainer);
+      return $(renderArticle(index, description, link, title))
+        .appendTo(this.articlesContainer);
     });
+    this.state.rssArticles.map(mapArticles);
     return this;
   }
   showModal(message) {
@@ -86,10 +94,43 @@ export default class RssReader {
     this.state.input.value = value;
     this.updateInputStatus(this.isValidInput(value));
   }
-  extractRssData(feed) {
-    const channel = $(parser.parseFromString(feed, 'application/xml')).find('channel');
-    const items = $(channel).find('item');
-    [...items].map(article => this.state.rssArticles.push(article));
+  getLastArticle(feedUrl) {
+    return [...this.state.rssArticles.filter(feed => feed.url === feedUrl)][0].items.slice(0, 1);
+  }
+  checkUpdate(feed) {
+    const timeOfLastArticle = getArticleTime(this.getLastArticle(feed.url));
+    axios.get(this.serviceUrl, {
+      params: {
+        url: feed.url,
+      },
+    }).then((response) => {
+      const result = retrieveArticlesFromFeed(response.data.body)
+        .filter(article => getArticleTime(article) > timeOfLastArticle);
+      if (result.length) {
+        result.map(newArticle => feed.items.unshift(newArticle));
+        this.clearArticles().renderArticles();
+      }
+    }).catch((error) => {
+      this.showModal(error.response.data.message);
+    });
+  }
+  startLookingForUpdate() {
+    if (!this.state.updateProcessIsRunning) {
+      this.state.updateProcessIsRunning = true;
+      setInterval(() => {
+        this.state.rssArticles.map(feed => this.checkUpdate(feed));
+      }, 5000);
+    }
+    return this;
+  }
+  extractRssData(feed, rssUrl) {
+    const result = {
+      url: rssUrl,
+      items: [],
+    };
+    retrieveArticlesFromFeed(feed).sort((a, b) => getArticleTime(b) - getArticleTime(a))
+      .map(article => result.items.push(article));
+    this.state.rssArticles.push(result);
     return this;
   }
   submitProcess(event) {
@@ -103,12 +144,12 @@ export default class RssReader {
         },
       }).then((response) => {
         this.state.rssFeeds.push(rssUrl);
-        const rssData = this.extractRssData(response.data.body);
-        this.extractRssData(rssData)
+        this.extractRssData(response.data.body, rssUrl)
           .updateButtonStatus()
           .clearInput()
           .clearArticles()
-          .renderArticles();
+          .renderArticles()
+          .startLookingForUpdate();
       }).catch((error) => {
         this.updateButtonStatus()
           .showModal(error.response.data.message);
