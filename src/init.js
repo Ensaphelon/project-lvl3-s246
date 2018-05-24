@@ -1,7 +1,6 @@
-import Example from './Example';
+import RssReader from './RssReader';
 
-export default () => {
-  const element = document.getElementById('point');
-  const obj = new Example(element);
-  obj.init();
+export default (container) => {
+  const obj = new RssReader(container);
+  return obj.init();
 };

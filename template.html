@@ -4,19 +4,46 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
-    <div class="container">
-      <div class="jumbotron">
-        <form class="form-inline">
-          <div class="form-group mb-2">
-            <div for="staticEmail2">Enter RSS feed URL here</div>
+    <div data-role="rss-reader" class="jumbotron">
+      <div class="row">
+        <div class="col-xs-12 col-md-6">
+          <form data-role="rss-form" class="form-inline">
+            <div class="form-group mb-2">
+              <div>Enter RSS feed URL here</div>
+            </div>
+            <div class="form-group mx-sm-3 mb-2">
+              <label for="url" class="sr-only">URL</label>
+              <input data-role="rss-input" type="text" class="form-control" id="url" placeholder="URL">
+            </div>
+            <button data-role="rss-submit" type="submit" class="btn btn-primary mb-2">Confirm</button>
+          </form>
+        </div>
+        <div class="col-xs-12 col-md-6">
+          <div class="articles">
+            <ul data-role="rss-articles" class="articles-list list-group"></ul>
           </div>
-          <div class="form-group mx-sm-3 mb-2">
-            <label for="url" class="sr-only">URL</label>
-            <input type="text" class="form-control" id="url" placeholder="URL">
+        </div>
+      </div>
+      <div class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Something went wrong</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div data-role="modal-content" class="modal-body">
+              <p>Error occured</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
           </div>
-          <button type="submit" class="btn btn-primary mb-2">Confirm</button>
-        </form>
+        </div>
       </div>
     </div>
   </body>
 </html>
+
+

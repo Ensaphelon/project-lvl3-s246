@@ -1,0 +1,5 @@
+.form-control.has-error {
+    border-color: red;
+    outline-color: red;
+    box-shadow: 0 0 0 0.2rem rgba(255, 0, 0, 0.15);
+}
