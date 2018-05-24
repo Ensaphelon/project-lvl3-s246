@@ -40,7 +40,7 @@ export default class RssReader {
     return this.state.isValidInput;
   }
   updateInputStatus(isValid) {
-    this.input.toggleClass('has-error', !isValid);
+    this.input.toggleClass('is-invalid', !isValid);
     return this;
   }
   updateButtonStatus() {
@@ -57,10 +57,17 @@ export default class RssReader {
     return this;
   }
   renderArticles() {
-    this.state.rssArticles.map((article) => {
+    this.state.rssArticles.map((article, index) => {
       const title = $(article).find('title').html();
       const link = $(article).find('link').html();
-      return $(`<li class="list-group-item"><a href="${link}">${title}</a></li>`)
+      const description = $(article).find('description').get(0).textContent;
+      return $(`
+        <li class="list-group-item article">
+          <button data-article-index="${index}" class="btn btn-primary article__button">See details</button>
+          <p class="article__description d-none">${description}</p>
+          <a class="article__link" href="${link}">${title}</a>
+        </li>
+        `)
         .prependTo(this.articlesContainer);
     });
     return this;
@@ -109,6 +116,9 @@ export default class RssReader {
   init() {
     this.input.on('input', () => this.inputProcess(this));
     this.form.on('submit', event => this.submitProcess(event));
+    $(document).on('click', '.article__button', (event) => {
+      this.showModal($(event.target).siblings('.article__description').html());
+    });
     return this;
   }
 }
