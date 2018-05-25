@@ -1,9 +1,17 @@
 import $ from 'jquery';
-import { isValidUrl, showModal, getUrlFromForm, hasFeed } from './utils';
+import qs from 'querystring';
+import { isValidUrl, showModal } from './utils';
 import { addRss } from './rss';
 
 const modal = $('[role="dialog"]');
 const input = $('[data-role="rss-input"]');
+
+const getUrlFromForm = form => qs.parse($(form).serialize()).url;
+
+const hasFeed = (feedUrl, state) => {
+  const { feeds } = state;
+  return feeds.filter(feed => feed.url === feedUrl).length > 0;
+};
 
 export const handleInput = (event, state) => {
   const newState = state;
@@ -24,5 +32,5 @@ export const handleSubmit = (event, state) => {
 
 export const handleArticleButton = (event) => {
   const message = $(event.target).siblings('.article__description').html();
-  showModal(modal, message);
+  showModal(modal, message.length ? message : 'There is no description');
 };

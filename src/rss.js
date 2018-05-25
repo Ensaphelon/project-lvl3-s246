@@ -5,6 +5,12 @@ import { showModal, clearInput, getArticleTime } from './utils';
 
 const parser = new DOMParser();
 const input = $('[data-role="rss-input"]');
+const button = $('[data-role="rss-submit"]');
+
+const toggleButtonActiveStatus = () => {
+  const isDisabled = button.attr('disabled');
+  return isDisabled ? button.removeAttr('disabled') : button.attr('disabled', '');
+};
 
 export const loadRss = (serviceUrl, feedUrl, action, state) => {
   axios.get(serviceUrl, {
@@ -12,8 +18,10 @@ export const loadRss = (serviceUrl, feedUrl, action, state) => {
       url: feedUrl,
     },
   }).then((response) => {
+    toggleButtonActiveStatus();
     action(response.data.body, feedUrl, state);
   }).catch((error) => {
+    toggleButtonActiveStatus();
     showModal(error.response.data.message);
   });
 };
@@ -36,5 +44,6 @@ const addNewFeed = (feed, feedUrl, state) => {
 
 export const addRss = (feedUrl, state) => {
   const serviceUrl = 'https://cors-proxy.htmldriven.com/';
+  toggleButtonActiveStatus();
   loadRss(serviceUrl, feedUrl, addNewFeed, state);
 };
