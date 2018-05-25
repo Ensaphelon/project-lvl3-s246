@@ -35,7 +35,6 @@ const addNewFeed = (feed, feedUrl, state) => {
 };
 
 export const addRss = (feedUrl, state) => {
-  const newState = state;
   const serviceUrl = 'https://cors-proxy.htmldriven.com/';
-  loadRss(serviceUrl, feedUrl, addNewFeed, newState);
+  loadRss(serviceUrl, feedUrl, addNewFeed, state);
 };
