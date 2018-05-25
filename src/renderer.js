@@ -1,7 +1,5 @@
 import $ from 'jquery';
 
-const articlesContainer = $('[data-role="rss-articles"]');
-
 const parseArticles = (article) => {
   const title = $(article).find('title').html();
   const link = $(article).find('link').html();
@@ -17,7 +15,10 @@ const renderArticle = articleData =>
     <a class="article__link" href="${articleData.link}">${articleData.title}</a>
   </li>`;
 
-export default (articles) => {
-  articles.map(article => articlesContainer
-    .append(renderArticle(parseArticles(article))));
+const iterate = (acc, article) => {
+  acc.push(renderArticle(parseArticles(article)));
+  return acc;
 };
+
+export default articles => articles.reduce((acc, article) => iterate(acc, article), []);
+
