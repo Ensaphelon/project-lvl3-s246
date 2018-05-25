@@ -49,10 +49,11 @@ const addNewFeed = (feed, feedUrl, state) => {
 
 const updateFeed = (feed, feedUrl, state) => {
   const articles = sortArticlesByTime(feed);
-  const existedFeedArticles = [...state.feeds.filter(current => current.url === feedUrl)];
-  const diffCount = articles.length - existedFeedArticles[0].items.length;
+  const existedFeedArticles = state.feeds.filter(current => current.url === feedUrl)[0];
+  const diffCount = articles.length - existedFeedArticles.items.length;
   if (diffCount) {
     const newArticles = articles.slice(0, diffCount);
+    newArticles.map(article => existedFeedArticles.items.push(article));
     articlesContainer.prepend(renderArticles(newArticles));
   }
 };
