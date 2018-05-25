@@ -1,6 +1,11 @@
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import $ from 'jquery';
-import init from './init';
+import run from './app';
 
-init($('[data-role="rss-reader"]'));
+const state = {
+  isValidUrl: false,
+  updateIsRunning: false,
+  feeds: [],
+};
+
+run(state);
