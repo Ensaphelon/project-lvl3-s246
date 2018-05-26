@@ -1,3 +1,5 @@
+import $ from 'jquery';
+
 const renderArticle = articleData =>
   `<li class="list-group-item article">
     <button data-role="rss-article-details"
@@ -6,10 +8,5 @@ const renderArticle = articleData =>
     <a class="article__link" href="${articleData.link}">${articleData.title}</a>
   </li>`;
 
-const iterate = (acc, article) => {
-  acc.push(renderArticle(article));
-  return acc;
-};
-
-export default articles => articles.reduce((acc, article) => iterate(acc, article), []);
-
+export default articles => articles
+  .map(article => $('[data-role="rss-articles"]').prepend(renderArticle(article)));

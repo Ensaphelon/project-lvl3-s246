@@ -1,65 +1,44 @@
 import axios from 'axios';
-import $ from 'jquery';
 import { find } from 'lodash';
+import parseRss from './parsers';
 import renderArticles from './renderer';
-import { showModal } from './utils';
-import { parseArticles } from './parsers';
 
-const button = $('[data-role="rss-submit"]');
-const articlesContainer = $('[data-role="rss-articles"]');
+const sortArticlesByTime = articles => articles.sort((a, b) => a.date < b.date);
 
-const toggleButtonActiveStatus = () => {
-  const isDisabled = button.attr('disabled');
-  return isDisabled ? button.removeAttr('disabled') : button.attr('disabled', '');
-};
-
-export const loadRss = (serviceUrl, feedUrl, action, state) => {
-  axios.get(serviceUrl, {
-    params: {
-      url: feedUrl,
-    },
-  }).then((response) => {
-    try {
-      action(response.data.body, feedUrl, state);
-    } catch (e) {
-      console.error(e);
-    }
-  }).catch((error) => {
-    toggleButtonActiveStatus();
-    showModal(error.response.data.message);
-  });
-};
-
-const sortArticlesByTime = (articles) => {
-  return articles.sort((a, b) => a.date < b.date);
-};
-
-const addNewFeed = (feed, feedUrl, state) => {
-  toggleButtonActiveStatus();
-  const articles = sortArticlesByTime(parseArticles(feed));
+const addNewFeed = (rss, feedUrl, state) => {
+  const articles = sortArticlesByTime(parseRss(rss));
   state.feeds.push({
     url: feedUrl,
     items: articles,
   });
-  articlesContainer.append(renderArticles(articles));
+  renderArticles(articles);
 };
 
-const updateFeed = (feed, feedUrl, state) => {
-  const articles = sortArticlesByTime(parseArticles(feed));
-  const existedFeed = find(state.feeds, (f) => f.url === feedUrl);
-  const diffCount = articles.length - existedFeed.items.length + 1;
+const updateFeed = (rss, feedUrl, state) => {
+  const articles = sortArticlesByTime(parseRss(rss));
+  const existedFeed = find(state.feeds, feed => feed.url === feedUrl);
+  const diffCount = articles.length - existedFeed.items.length;
   if (diffCount) {
     const newArticles = articles.slice(0, diffCount);
     newArticles.map(article => existedFeed.items.unshift(article));
-    articlesContainer.prepend(renderArticles(newArticles));
+    renderArticles(newArticles);
   }
 };
 
-export const addRss = (feedUrl, state) => {
+const loadRss = (serviceUrl, url, action, state) => {
+  axios.get(serviceUrl, {
+    params: { url },
+  }).then((response) => {
+    action(response.data.body, url, state);
+  }).catch((error) => {
+    console.error(error.response.data.message);
+  });
+};
+
+export default (url, state) => {
   const newState = state;
   const serviceUrl = 'https://cors-proxy.htmldriven.com/';
-  loadRss(serviceUrl, feedUrl, addNewFeed, state);
-  toggleButtonActiveStatus();
+  loadRss(serviceUrl, url, addNewFeed, state);
   if (!newState.updateIsRunning) {
     newState.updateIsRunning = true;
     setInterval(() => {

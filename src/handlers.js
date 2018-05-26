@@ -1,12 +1,17 @@
 import $ from 'jquery';
 import qs from 'querystring';
-import { clearInput, isValidUrl, showModal } from './utils';
-import { addRss } from './rss';
+import validator from 'validator';
+import addRss from './rss';
 
-const modal = $('[role="dialog"]');
-const input = $('[data-role="rss-input"]');
+const isValidUrl = url => validator.isURL(url);
 
-const getUrlFromForm = form => qs.parse($(form).serialize()).url;
+const showModal = (message) => {
+  const modal = $('[role="dialog"]');
+  modal.find('[data-role="modal-content"]').html(message);
+  modal.modal('toggle');
+};
+
+const clearInput = input => input.val('');
 
 const hasFeed = (feedUrl, state) => {
   const { feeds } = state;
@@ -15,23 +20,24 @@ const hasFeed = (feedUrl, state) => {
 
 export const handleInput = (event, state) => {
   const newState = state;
+  const input = $(event.target);
   const value = input.val();
   newState.isValidUrl = isValidUrl($(event.target).val()) && !hasFeed(value, newState);
-  $(event.target).toggleClass('is-invalid', !newState.isValidUrl);
+  input.toggleClass('is-invalid', !newState.isValidUrl);
 };
 
 export const handleSubmit = (event, state) => {
   event.preventDefault();
-  const url = getUrlFromForm(event.target);
+  const { url } = qs.parse($(event.target).serialize());
   if (state.isValidUrl) {
     addRss(url, state);
-    clearInput(input);
+    clearInput($(event.target).find('[data-role="rss-input"]'));
   } else {
-    showModal(modal, 'Enter valid URL please');
+    showModal('Enter valid URL please');
   }
 };
 
 export const handleArticleButton = (event) => {
   const message = $(event.target).siblings('.article__description').html();
-  showModal(modal, message.length ? message : 'There is no description');
+  showModal(message.length ? message : 'There is no description');
 };
