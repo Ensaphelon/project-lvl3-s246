@@ -11,8 +11,6 @@ const showModal = (message) => {
   modal.modal('toggle');
 };
 
-const clearInput = input => input.val('');
-
 const hasFeed = (feedUrl, state) => {
   const { feeds } = state;
   return feeds.filter(feed => feed.url === feedUrl).length > 0;
@@ -31,7 +29,7 @@ export const handleSubmit = (event, state) => {
   const { url } = qs.parse($(event.target).serialize());
   if (state.isValidUrl) {
     addRss(url, state);
-    clearInput($(event.target).find('[data-role="rss-input"]'));
+    $(event.target).find('[data-role="rss-input"]').val('');
   } else {
     showModal('Enter valid URL please');
   }
