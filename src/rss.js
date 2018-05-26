@@ -5,8 +5,7 @@ import renderArticles from './renderer';
 
 const sortArticlesByTime = articles => articles.sort((a, b) => a.date < b.date);
 
-const addNewFeed = (rss, feedUrl, state) => {
-  const articles = sortArticlesByTime(parseRss(rss));
+const addNewFeed = (articles, feedUrl, state) => {
   state.feeds.push({
     url: feedUrl,
     items: articles,
@@ -14,8 +13,7 @@ const addNewFeed = (rss, feedUrl, state) => {
   renderArticles(articles);
 };
 
-const updateFeed = (rss, feedUrl, state) => {
-  const articles = sortArticlesByTime(parseRss(rss));
+const updateFeed = (articles, feedUrl, state) => {
   const existedFeed = find(state.feeds, feed => feed.url === feedUrl);
   const diffCount = articles.length - existedFeed.items.length;
   if (diffCount) {
@@ -29,7 +27,7 @@ const loadRss = (url, action, state) => {
   axios.get('https://cors-proxy.htmldriven.com/', {
     params: { url },
   }).then((response) => {
-    action(response.data.body, url, state);
+    action(sortArticlesByTime(parseRss(response.data.body)), url, state);
   }).catch((error) => {
     console.error(error.response.data.message);
   });
