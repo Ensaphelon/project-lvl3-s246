@@ -9,4 +9,4 @@ const renderArticle = articleData =>
   </li>`;
 
 export default articles => articles
-  .map(article => $('[data-role="rss-articles"]').prepend(renderArticle(article)));
+  .forEach(article => $('[data-role="rss-articles"]').prepend(renderArticle(article)));

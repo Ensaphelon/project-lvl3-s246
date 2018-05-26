@@ -1,6 +1,6 @@
 {
   "name": "ensaphelon-rss-reader",
-  "version": "0.0.1",
+  "version": "0.8.0",
   "description": "Hexlet project 'RSS Reader'",
   "scripts": {
     "webpack-serve": "webpack-serve",

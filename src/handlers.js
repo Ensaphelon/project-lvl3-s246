@@ -1,9 +1,8 @@
 import $ from 'jquery';
 import qs from 'querystring';
 import validator from 'validator';
+import { find } from 'lodash';
 import addRss from './rss';
-
-const isValidUrl = url => validator.isURL(url);
 
 const showModal = (message) => {
   const modal = $('[role="dialog"]');
@@ -11,16 +10,14 @@ const showModal = (message) => {
   modal.modal('toggle');
 };
 
-const hasFeed = (feedUrl, state) => {
-  const { feeds } = state;
-  return feeds.filter(feed => feed.url === feedUrl).length > 0;
-};
+const hasFeed = (feedUrl, state) => find(state.feeds, feed => feed.url === feedUrl);
+
+const isValidUrl = (url, state) => validator.isURL(url) && !hasFeed(url, state);
 
 export const handleInput = (event, state) => {
   const newState = state;
   const input = $(event.target);
-  const value = input.val();
-  newState.isValidUrl = isValidUrl($(event.target).val()) && !hasFeed(value, newState);
+  newState.isValidUrl = isValidUrl(input.val(), state);
   input.toggleClass('is-invalid', !newState.isValidUrl);
 };
 
