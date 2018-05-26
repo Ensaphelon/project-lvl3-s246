@@ -25,8 +25,8 @@ const updateFeed = (rss, feedUrl, state) => {
   }
 };
 
-const loadRss = (serviceUrl, url, action, state) => {
-  axios.get(serviceUrl, {
+const loadRss = (url, action, state) => {
+  axios.get('https://cors-proxy.htmldriven.com/', {
     params: { url },
   }).then((response) => {
     action(response.data.body, url, state);
@@ -37,12 +37,11 @@ const loadRss = (serviceUrl, url, action, state) => {
 
 export default (url, state) => {
   const newState = state;
-  const serviceUrl = 'https://cors-proxy.htmldriven.com/';
-  loadRss(serviceUrl, url, addNewFeed, state);
+  loadRss(url, addNewFeed, state);
   if (!newState.updateIsRunning) {
     newState.updateIsRunning = true;
     setInterval(() => {
-      state.feeds.map(feed => loadRss(serviceUrl, feed.url, updateFeed, state));
+      state.feeds.map(feed => loadRss(feed.url, updateFeed, state));
     }, 5000);
   }
 };
