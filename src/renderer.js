@@ -1,12 +1,3 @@
-import $ from 'jquery';
-
-const parseArticles = (article) => {
-  const title = $(article).find('title').html();
-  const link = $(article).find('link').html();
-  const description = $(article).find('description').get(0).textContent;
-  return { description, link, title };
-};
-
 const renderArticle = articleData =>
   `<li class="list-group-item article">
     <button data-role="rss-article-details"
@@ -16,7 +7,7 @@ const renderArticle = articleData =>
   </li>`;
 
 const iterate = (acc, article) => {
-  acc.push(renderArticle(parseArticles(article)));
+  acc.push(renderArticle(article));
   return acc;
 };
 

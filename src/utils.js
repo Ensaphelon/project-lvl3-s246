@@ -10,4 +10,3 @@ export const showModal = (instance, message) => {
   instance.modal('toggle');
 };
 
-export const getArticleTime = article => new Date($(article).find('pubDate').html()).getTime();

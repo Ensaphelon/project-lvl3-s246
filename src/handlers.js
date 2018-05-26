@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import qs from 'querystring';
-import { isValidUrl, showModal } from './utils';
+import { clearInput, isValidUrl, showModal } from './utils';
 import { addRss } from './rss';
 
 const modal = $('[role="dialog"]');
@@ -25,6 +25,7 @@ export const handleSubmit = (event, state) => {
   const url = getUrlFromForm(event.target);
   if (state.isValidUrl) {
     addRss(url, state);
+    clearInput(input);
   } else {
     showModal(modal, 'Enter valid URL please');
   }

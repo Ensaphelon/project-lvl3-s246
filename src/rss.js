@@ -1,10 +1,10 @@
 import axios from 'axios';
 import $ from 'jquery';
+import { find } from 'lodash';
 import renderArticles from './renderer';
-import { showModal, clearInput, getArticleTime } from './utils';
+import { showModal } from './utils';
+import { parseArticles } from './parsers';
 
-const parser = new DOMParser();
-const input = $('[data-role="rss-input"]');
 const button = $('[data-role="rss-submit"]');
 const articlesContainer = $('[data-role="rss-articles"]');
 
@@ -19,41 +19,38 @@ export const loadRss = (serviceUrl, feedUrl, action, state) => {
       url: feedUrl,
     },
   }).then((response) => {
-    action(response.data.body, feedUrl, state);
+    try {
+      action(response.data.body, feedUrl, state);
+    } catch (e) {
+      console.error(e);
+    }
   }).catch((error) => {
     toggleButtonActiveStatus();
     showModal(error.response.data.message);
   });
 };
 
-const retrieveArticlesFromFeed = (feed) => {
-  const channel = $(parser.parseFromString(feed, 'application/xml')).find('channel');
-  return [...$(channel).find('item')];
-};
-
-const sortArticlesByTime = (feed) => {
-  const articles = retrieveArticlesFromFeed(feed);
-  return articles.sort((a, b) => getArticleTime(a) < getArticleTime(b));
+const sortArticlesByTime = (articles) => {
+  return articles.sort((a, b) => a.date < b.date);
 };
 
 const addNewFeed = (feed, feedUrl, state) => {
   toggleButtonActiveStatus();
-  const sortedArticles = sortArticlesByTime(feed);
+  const articles = sortArticlesByTime(parseArticles(feed));
   state.feeds.push({
     url: feedUrl,
-    items: sortedArticles,
+    items: articles,
   });
-  clearInput(input);
-  articlesContainer.append(renderArticles(sortedArticles));
+  articlesContainer.append(renderArticles(articles));
 };
 
 const updateFeed = (feed, feedUrl, state) => {
-  const articles = sortArticlesByTime(feed);
-  const existedFeedArticles = state.feeds.filter(current => current.url === feedUrl)[0];
-  const diffCount = articles.length - existedFeedArticles.items.length;
+  const articles = sortArticlesByTime(parseArticles(feed));
+  const existedFeed = find(state.feeds, (f) => f.url === feedUrl);
+  const diffCount = articles.length - existedFeed.items.length + 1;
   if (diffCount) {
     const newArticles = articles.slice(0, diffCount);
-    newArticles.map(article => existedFeedArticles.items.push(article));
+    newArticles.map(article => existedFeed.items.unshift(article));
     articlesContainer.prepend(renderArticles(newArticles));
   }
 };
