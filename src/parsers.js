@@ -9,12 +9,9 @@ const retrieveArticlesFromFeed = (feed) => {
 
 const getRssNodeContent = (article, name) => $(article).find(name).html();
 
-export default (feed) => {
-  const articles = retrieveArticlesFromFeed(feed);
-  return articles.reduce((acc, article) => [...acc, {
-    description: getRssNodeContent(article, 'description'),
-    link: getRssNodeContent(article, 'link'),
-    title: getRssNodeContent(article, 'title'),
-    date: new Date(getRssNodeContent(article, 'pubDate')).getTime(),
-  }], []);
-};
+export default feed => retrieveArticlesFromFeed(feed).map(article => ({
+  description: getRssNodeContent(article, 'description'),
+  link: getRssNodeContent(article, 'link'),
+  title: getRssNodeContent(article, 'title'),
+  date: new Date(getRssNodeContent(article, 'pubDate')).getTime(),
+}));

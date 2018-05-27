@@ -23,6 +23,7 @@ const updateFeed = (articles, feedUrl, state) => {
 const loadRss = (url, action, state) => get('https://cors-proxy.htmldriven.com/', {
   params: { url },
 }).then((response) => {
+  console.log(parseRss(response.data.body));
   action(sortArticlesByTime(parseRss(response.data.body)), url, state);
 }).catch((error) => {
   console.error(error.response.data.message);
